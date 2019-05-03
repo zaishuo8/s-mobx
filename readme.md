@@ -73,3 +73,71 @@ obj.a = 2;
 执行 `obj.a = 1; obj.a = 2;`，会自动执行 `() => console.log(obj.a)` 函数，控制台打印 1 2
 
 打个 tag, `git tag v0.1`
+
+## 完善 observe
+
+遍历 obj 的 key，每个都被观察
+
+```
+function observe(obj) {
+    Object.keys(obj).forEach(key => {
+        const value = obj[key];
+        observeKey(obj, key, value);
+    });
+}
+
+function observeKey(obj, key, value) {
+    const dependency = [];  // 存放依赖了该 key 的 fn
+    Object.defineProperty(obj, key, {
+        get() {
+            if (TempCollection.target && dependency.indexOf(TempCollection.target === -1)) {
+                dependency.push(TempCollection.target);
+            }
+            return value;
+        },
+        set(newVal) {
+            value = newVal;
+            dependency.forEach((dep) => {
+                dep();
+            });
+        }
+    });
+}
+```
+
+用测试代码测试下效果
+
+```
+const { autorun, observe } = require('../lib/mobx');
+
+const obj = {
+    a: 10,
+    b: 100
+};
+
+observe(obj);
+
+autorun(() => console.log(`a 的 autorun: ${obj.a}`));
+autorun(() => console.log(`b 的 autorun: ${obj.b}`));
+
+obj.a = 11;
+obj.a = 12;
+
+obj.b = 101;
+obj.b = 102;
+```
+
+执行后，控制台自动打印 
+
+```
+a 的 autorun: 11
+a 的 autorun: 12
+b 的 autorun: 101
+b 的 autorun: 102
+```
+
+## Todo List
+
+- 当 obj 是多层对象的时候，递归遍历 key 收集依赖
+- mobx-react autorun 中实现组件的 forceupdate
+- @observe 方式收集依赖
