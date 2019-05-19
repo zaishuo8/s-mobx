@@ -1,5 +1,5 @@
 # 文档 
-s-mobx 是一个乞丐版的 mobx, 为了实现下 observe 和 autorun，记录思路过程
+s-mobx 一个很简单的 mobx, 为了实现下 observe 和 autorun 的功能，文章记录下自己的思考过程 🤔
 
 ## 目标
 
